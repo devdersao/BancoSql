@@ -1,0 +1,208 @@
+package Prova2AndersonSilva;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
+public class Prova2AndersonSilva{
+    private static String status;
+public static void deletaTabela(Connection con){
+    try{
+        Statement stmt = con.createStatement();
+        String sql = "DROP TABLE IF EXISTS Pontuacao";
+        stmt.executeUpdate(sql);
+        stmt.close();
+        System.out.println("Tabela pontuacao deletada com Sucesso!");
+    }catch(SQLException e){
+        throw new RuntimeException(e);
+    }
+}
+
+public static void criaTabela(Connection con)throws SQLException{
+    Statement stnt;
+    try{
+        stnt = (Statement)con.createStatement();
+        String criaTabela = "create table IF NOT EXISTS Pontuacao(\n"+
+                            "id BIGINT NOT NULL AUTO_INCREMENT,\n"+
+                            "clube VARCHAR(255),\n"+
+                            "pts DOUBLE, \n"+
+                            "pj DOUBLE, \n"+
+                            "VIT DOUBLE, \n"+
+                            "E DOUBLE, \n"+
+                            "DER DOUBLE, \n"+
+                            "GP DOUBLE, \n"+
+                            "GC DOUBLE, \n"+
+                            "primary key (id)\n"+
+                            ");";
+        stnt.execute(criaTabela);
+        stnt.close();
+        
+        System.out.println("Tabela Potuacao Criada com Sucesso");
+    }catch(SQLException ex){
+        Logger.getLogger(Prova2AndersonSilva.class.getName()).log(Level.SEVERE,null,ex);
+    }
+
+}
+    public static void insereTuplas(Connection con , String clube, String pts,String pj,String VIT,String E,String DER,String GP,String GC)throws SQLException{
+                
+                String sql = "insert ignore into Pontuacao" +"(clube,pts,pj,VIT,E,DER,GP,GC)"+ "values(?,?,?,?,?,?,?,?)";
+    
+                PreparedStatement stmt = con.prepareStatement(sql);
+    
+    
+                stmt.setString(1,clube);
+                stmt.setString(2,pts);
+                stmt.setString(3,pj);
+                stmt.setString(4,VIT);
+                stmt.setString(5,E);
+                stmt.setString(6,DER);
+                stmt.setString(7,GP);
+                stmt.setString(8,GC);
+                
+                stmt.execute();
+                stmt.close();
+                
+    System.out.println("pontuacao inserida com Sucesso!");
+}
+    
+    public static void consulta (Connection con , String select)throws SQLException{
+        PreparedStatement stmt = con.prepareStatement(select);
+        //executa no select
+        ResultSet rs = stmt.executeQuery();
+        //itera no ResultSet
+        if(rs.next()==false){
+            System.out.println("Nenhuma tupla econtrada !");
+            
+        }else{
+            do{
+                //clube,pts,pj,VIT,E,DER,GP,GC
+                String clube = rs.getString("clube");
+                String pts = rs.getString("pts");
+                String pj = rs.getString("pj");
+                String VIT = rs.getString("VIT");
+                String E = rs.getString("E");
+                String DER = rs.getString("DER");
+                String GP = rs.getString("GP");
+                String GC = rs.getString("GC");
+             System.out.println(clube +" "+pts +" "+pj +" "+VIT +" "+E+" "+DER +" "+GP +" "+GC);   
+            }while(rs.next());
+        }
+        stmt.close();
+}
+    //feita para a consulta "A"C1
+   public static void c1 (Connection con , String select)throws SQLException{
+        PreparedStatement stmt = con.prepareStatement(select);
+        //executa no select
+        ResultSet rs = stmt.executeQuery();
+        //itera no ResultSet
+        if(rs.next()==false){
+            System.out.println("Nenhuma tupla econtrada !");
+            
+        }else{
+            do{
+                System.out.println(rs.getInt(1));
+    }while(rs.next());
+    
+    }
+    
+    stmt.close();
+}
+    //feita para a consulta "B" C2
+    public static void c2 (Connection con , String select)throws SQLException{
+        PreparedStatement stmt = con.prepareStatement(select);
+        //executa no select
+        ResultSet rs = stmt.executeQuery();
+        //itera no ResultSet
+        if(rs.next()==false){
+            System.out.println("Nenhuma tupla econtrada !");
+            
+        }else{
+            do{
+                String clube = rs.getString("clube");
+                String pts = rs.getString("pts");
+                System.out.println(clube + " - "+pts);
+    }while(rs.next());
+    
+    }
+    
+    stmt.close();
+}
+    //feita para a consulta "C" C3
+    public static void c3 (Connection con , String select)throws SQLException{
+        PreparedStatement stmt = con.prepareStatement(select);
+        //executa no select
+        ResultSet rs = stmt.executeQuery();
+        //itera no ResultSet
+        if(rs.next()==false){
+            System.out.println("Nenhuma tupla econtrada !");
+            
+        }else{
+            do{
+                System.out.println(rs.getInt(1));
+    }while(rs.next());
+    
+    }
+    
+    stmt.close();
+}
+
+    public static void main(String[]args) throws SQLException{
+        Connection connection = null; //atributo do tipo conecção
+        
+        try{
+            //carregando o JDBC Driver padrão
+            String driverName = "com.mysql.jdbc.Driver";
+            Class.forName(driverName);
+            // configurar conexao com banco de dados
+            String serverName = "localhost"; 
+            String mydatabase = "CODINGGROUND";
+            String url = "jdbc:mysql://"+ serverName + ":3306/"+mydatabase;
+            String username = "root";
+            String password = "root";
+            connection = DriverManager.getConnection(url,username,password);
+            if(connection != null){
+                status = ("STATUS ----------> CONECTADO COM SUCESSO!");
+                
+            }else{
+                status = ("STATUS ----------->NÃO FOI POSSIVEL REALIZAR CONEXAO");
+            }
+            System.out.println(status);
+            
+            deletaTabela(connection);
+            criaTabela(connection);
+            
+            //clube,pts,pj,VIT,E,DER,GP,GC
+            
+            insereTuplas(connection,"Palmeiras ","16 ","6 ","5 ","1 ","0 ","14 ","2 ");
+            insereTuplas(connection,"Atletico ","15 ","7 ","5 ","0 ","2 ","12 ","7 ");
+            insereTuplas(connection,"Santos ","14 ","7 ","4 ","2 ","1 ","18 ","6 ");
+            insereTuplas(connection,"Flamengo ","13 ","7 ","4 ","1 ","2 ","13 ","9 ");
+            insereTuplas(connection,"Internacional ","13 ","7 ","4 ","1 ","2 ","9 ","5 ");
+            
+            System.out.println("\n consulta c1 \n");
+            System.out.println("\n A MAIOR PONTUAÇÃO DO CAMPEONATO EH: \n");
+            
+            c1(connection,"select max(pts) from Pontuacao");
+            
+            System.out.println("\n consulta c2 \n");
+            c2(connection,"select * from Pontuacao where pts > 14");
+            
+            System.out.println("\n consulta c3 \n");
+            System.out.println("\n Ah média eh: \n");
+            
+            c3(connection,"select avg(GP) from Pontuacao");
+            
+            
+        }catch(ClassNotFoundException e){
+            System.out.println("O Driver expecificado nao foi encontrado.");
+        }catch(SQLException e){
+            System.out.println("Nao foi possivel conectar ao banco de dados !");
+        }
+        connection.close();
+    }
+}

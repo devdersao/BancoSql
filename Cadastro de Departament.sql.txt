@@ -1,0 +1,227 @@
+package trabalho2.anderson.silva;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author Anderson silva
+ */
+public class Trabalho2AndersonSilva {
+    
+    private static String status;
+    
+    public static void deletaTabela(Connection con){
+        try{
+            Statement stmt = con.createStatement();
+            String sql = "DROP TABLE IF EXISTS Funcionarios";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            System.out.println("Tabela de Funcionarios deletada com Sucesso!");
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static void criaTabela(Connection con) throws SQLException{
+        Statement stnt;
+        try {
+            stnt = (Statement) con.createStatement();
+            String criaTabela = "       create table IF NOT EXISTS Funcionarios (\n"+
+                    "       id          BIGINT NOT NULL AUTO_INCREMENT, \n"+
+                    "       sexo   ENUM('M','F'),\n"+
+                    "       nome      VARCHAR(255),\n"+
+                    "       sobrenome      VARCHAR(255),\n"+
+                    "       estado    VARCHAR(255),\n"+
+                    "       datanascimento   VARCHAR(10),\n"+
+                    "       salario      DOUBLE, \n"+
+                    "       primary key (id)\n"+
+                    ");";
+            stnt.execute(criaTabela);
+            stnt.close();
+            
+            System.out.println("Tabela Funcionarios criada com sucesso");
+        } catch (SQLException ex) {
+            Logger.getLogger(Trabalho2AndersonSilva.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    public static void insere(Connection con, String sexo, String nome, String sobrenome, String estado, String datanascimento,String salario) throws SQLException{
+        String sql = "insert ignore into Funcionarios" + "( sexo, nome,sobrenome,estado,datanascimento,salario)" + " values (?,?,?,?,?,?)";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        stmt.setString(1, sexo);
+        stmt.setString(2, nome);
+        stmt.setString(3, sobrenome);
+        stmt.setString(4, estado);
+        stmt.setString(5, datanascimento);
+        stmt.setString(6, salario);
+        
+        stmt.execute();
+        stmt.close();
+        System.out.println("Funcionario inserido com sucesso!");
+    }
+    
+    public static void consulta(Connection con, String select) throws SQLException {
+        PreparedStatement stmt = con.prepareStatement(select);
+        //executa no select
+        ResultSet rs = stmt.executeQuery();
+        //itera no ResultSet
+        
+        if(rs.next() == false){
+            System.out.println("Nenhuma tupla encontrada!");
+        }else{
+            do{
+          
+                String sexo = rs.getString("sexo");
+                String nome = rs.getString("nome");
+                String sobrenome = rs.getString("sobrenome");
+                String estado = rs.getString("estado");
+                String datanascimento = rs.getString("datanascimento");
+                String salario = rs.getString("salario");
+                System.out.println(sexo + " " + nome + " " + sobrenome + " "+ estado + " " +datanascimento + " " + "R$" + salario); 
+            }while (rs.next());
+        }
+        stmt.close();
+    }
+    
+    public static void consulta2(Connection con, String select) throws SQLException {
+        PreparedStatement stmt = con.prepareStatement(select);
+        //executa no select
+        ResultSet rs = stmt.executeQuery();
+        //itera no ResultSet
+        
+        if(rs.next() == false){
+            System.out.println("Nenhuma tupla encontrada!");
+        }else{
+            do{
+                String sobrenome = rs.getString("sobrenome");
+                String salario = rs.getString("salario");
+                System.out.println(sobrenome + " -  R$" + salario); 
+            }while (rs.next());
+        }
+        stmt.close();
+    }
+    
+    public static void consultaSexo(Connection con, String select) throws SQLException {
+        PreparedStatement stmt = con.prepareStatement(select);
+        //executa no select
+        ResultSet rs = stmt.executeQuery();
+        //itera no ResultSet
+        
+        if(rs.next() == false){
+            System.out.println("Nenhuma tupla encontrada!");
+        }else{
+            do{
+                String sexo= rs.getString("sexo");
+                System.out.println(sexo); 
+            }while (rs.next());
+        }
+        stmt.close();
+    }    
+    
+    public static void consultaint(Connection con, String select) throws SQLException{
+            PreparedStatement stmt = con.prepareStatement(select);
+            //executa um select
+            ResultSet rs = stmt.executeQuery();
+            //itera no ResultSet
+            
+            if (rs.next() == false) {
+            
+                System.out.println("Nenhuma tupla encontrada!"); 
+            
+            }else {
+            do {               
+                System.out.println(rs.getInt(1));
+            }while (rs.next()); }
+            stmt.close();
+            
+        }
+    
+    /**
+     * 
+     * @param args 
+     */
+    public static void main(String[] args) throws SQLException{
+       Connection connection = null;          //atributo do tipo Connection
+
+        try {
+            // Carregando o JDBC Driver padrão
+            String driverName = "com.mysql.jdbc.Driver";
+            Class.forName(driverName);
+            // Configurando a nossa conexão com um banco de dados//
+            String serverName = "localhost";    //caminho do servidor do BD
+            String mydatabase = "CODINGGROUND";        //nome do seu banco de dados
+            String url = "jdbc:mysql://" + serverName + ":3306/" + mydatabase;
+            String username = "root";        //nome de um usuário de seu BD      
+            String password = "root";      //sua senha de acesso
+            connection = DriverManager.getConnection(url, username, password);
+
+            //Testa sua conexão//  
+            if (connection != null) {
+                status = ("STATUS--->Conectado com sucesso!");
+
+            } else {
+                status = ("STATUS--->Não foi possivel realizar conexão");
+            }
+
+            System.out.println(status);
+            
+            deletaTabela(connection);
+            criaTabela(connection);
+         //sexo ,String nome , String sobrenome,String estado, String datanascimento ,double salario
+            insere(connection,"M", "Anderson","Silva","São Paulo","19/11/1996", "627.00");
+            insere(connection,"M", "Giulia","Santos","Mato Grosso","21/04/1999", "1500.00");
+            insere(connection,"M", "wellington","Aquino","São Paulo","06/06/1998","5000000");
+            insere(connection,"M", "Giuliano","Macedo","Mato Grosso do Sul","09/05/1998","100.000.00");
+            insere(connection,"M", "Bryan","Crystopher","São Paulo","09/05/2000","2000.00");
+            
+            insere(connection,"F", "Ellen","Alcantara","São Paulo","16/02/1999","2000.00");
+            insere(connection,"F", "Cleo","Almeida","Bahia","28/02/1963", "100.000.00");
+            insere(connection,"F", "Rosana","Silva","São Paulo","19/11/1996", "50.000.00");
+            insere(connection,"F", "Brisa","Kanot","Bahia","28/02/1963",  "1500.00");
+            insere(connection,"F", "Carla","Carneiro","Bahia","29/02/1963",  "627.00");
+      
+            
+            
+            System.out.println("\nconsulta 1");
+            consulta(connection, "select * from Funcionarios");
+            
+            System.out.println("\nconsulta 2");
+            consulta(connection, "select * from Funcionarios where sexo = 'M'");
+            
+            System.out.println("\nconsulta 3");
+            consulta(connection, "select * from Funcionarios where sexo = 'F'");
+            
+            System.out.println("\nconsulta 4");
+            consulta(connection, "select * from Funcionarios where sexo = 'M' AND salario >= 600");
+            
+            System.out.println("\nconsulta 5");
+            consulta(connection, "select * from Funcionarios where datanascimento='19/11/1996' AND salario > 600");
+            
+            System.out.println("\nconsulta 6");
+            consulta2(connection, "select sobrenome,salario from Funcionarios where sobrenome = 'Silva' AND salario >=500");
+            
+            System.out.println("\nconsulta 7 ");
+            consultaint(connection, "select avg(salario) from Funcionarios where salario >= 500 ");
+        
+        } 
+        catch (ClassNotFoundException e) {  //Driver não encontrado
+            System.out.println("O driver expecificado nao foi encontrado.");
+        } 
+        catch (SQLException e) {
+            //Não conseguindo se conectar ao banco
+            System.out.println("Nao foi possivel conectar ao Banco de Dados.");
+        }
+
+        connection.close();
+    }
+    
+}
